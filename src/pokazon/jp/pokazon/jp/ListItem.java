@@ -1,5 +1,9 @@
 package pokazon.jp;
-
+/**
+ * 未使用
+ * @author XXXX
+ *
+ */
 public class ListItem {
 
 	private int imageId;

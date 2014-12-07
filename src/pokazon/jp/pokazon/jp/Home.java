@@ -34,6 +34,20 @@ public class Home extends Activity implements View.OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+	@Override
+	protected void onResume() {
+		// TODO 自動生成されたメソッド・スタブ
+		super.onResume();
 		setContentView(R.layout.home);
 
 		//ImageView img = (ImageView) findViewById(R.id.imageView2);
@@ -68,21 +82,6 @@ public class Home extends Activity implements View.OnClickListener {
         	// 異常終了
         	return;
         }
-
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-
-	@Override
-	protected void onResume() {
-		// TODO 自動生成されたメソッド・スタブ
-		super.onResume();
-
 	}
 
 	@Override
@@ -97,8 +96,7 @@ public class Home extends Activity implements View.OnClickListener {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public class GifImageView extends ImageView
-	{
+	public class GifImageView extends ImageView {
 	    private Movie mMovie;
 
 	    private long mMoviestart;
@@ -149,7 +147,7 @@ public class Home extends Activity implements View.OnClickListener {
 	        move.start();
 
 
-	}
+		}
 
 	}
 
@@ -160,11 +158,11 @@ public class Home extends Activity implements View.OnClickListener {
 		final Intent intent = new Intent(this,MainActivity.class);
 		switch(v.getId()){
 		case R.id.imageButton2: //作るボタン
+
+			//アラートダイアログを生成
 			// カスタムビューを設定
 			LayoutInflater inflater = (LayoutInflater)this.getSystemService(LAYOUT_INFLATER_SERVICE);
 			final View layout = inflater.inflate(R.layout.dialog, (ViewGroup)findViewById(R.id.layout_root));
-
-			//アラートダイアログを生成
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("かみしばいのなまえをいれてね");
 			builder.setView(layout);
@@ -175,13 +173,22 @@ public class Home extends Activity implements View.OnClickListener {
 					String strname = name.getText().toString();
 					Log.d("MainActivity","トースト");
 	                //入力した文字をトースト出力する
-	                Toast.makeText(Home.this,
+/*	                Toast.makeText(Home.this,
 	                        strname,
 	                        Toast.LENGTH_LONG).show();
-	                String mk = helper.makeKamishibai(sdb, strname);
-	                Log.d("-Home-",mk);
-	                helper.makePhoto(sdb,mk);
-	                intent.putExtra("title", mk);
+*/
+					// 紙芝居名が既存のものか確認
+	                int kamiID = helper.selectKamishibai(sdb, strname);
+
+	                if(kamiID < 0){
+	                	// 紙芝居名が既存のものでなければ、レコードを作成
+		                // 紙芝居レコードを作成して紙芝居IDを受け取る
+	                	kamiID = helper.makeKamishibai(sdb, strname);
+		                // 写真テーブルに紙芝居番号を持ったレコードを作成する
+		                helper.makePhoto(sdb,kamiID);
+	                }
+	                Log.d("-Home- KamiID = ", String.valueOf(kamiID));
+	                intent.putExtra("kamiID", kamiID);
 	       			startActivity(intent);
 				}
 			});
@@ -193,8 +200,43 @@ public class Home extends Activity implements View.OnClickListener {
 			builder.create().show();
 			break;
 		case R.id.imgselect: // 見るボタン
-			Intent intent1 = new Intent(Home.this,suraid.class);
-			startActivity(intent1);
+
+			//アラートダイアログを生成
+			// カスタムビューを設定
+			LayoutInflater inflater2 = (LayoutInflater)this.getSystemService(LAYOUT_INFLATER_SERVICE);
+			final View layout2 = inflater2.inflate(R.layout.dialog, (ViewGroup)findViewById(R.id.layout_root));
+			AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
+			builder2.setTitle("みたい　かみしばいのなまえをいれてね");
+			builder2.setView(layout2);
+			builder2.setPositiveButton("これをみる", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton){
+					// つくる ボタンクリック取得
+					EditText name = (EditText)layout2.findViewById(R.id.customDlg_title);
+					String strname = name.getText().toString();
+					Log.d("MainActivity","トースト");
+	                //入力した文字をトースト出力する
+/*
+	                Toast.makeText(Home.this,
+	                        strname,
+	                        Toast.LENGTH_LONG).show();
+*/
+	                // 紙芝居レコードを作成して紙芝居IDを受け取る
+	                int kamiID = helper.selectKamishibai(sdb, strname);
+
+	                Log.d("-Home:select- KamiID = ", String.valueOf(kamiID));
+	                if(kamiID > 0){
+		    			Intent intent1 = new Intent(Home.this,suraid.class);
+		                intent1.putExtra("kamiID", kamiID);
+		    			startActivity(intent1);
+	                }
+	                else{
+		                Toast.makeText(Home.this,
+		                        "そのなまえの かみしばいがありません",
+		                        Toast.LENGTH_LONG).show();
+	                }
+				}
+			});
+			builder2.create().show();
 			break;
 			//テキスト入力を受け付けるビューを作成します。
 			/*

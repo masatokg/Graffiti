@@ -2,6 +2,11 @@ package pokazon.jp;
 
 import android.app.Activity;
 
+/**
+ * 未使用
+ * @author XXXX
+ *
+ */
 public class MainActivity2 extends Activity {
 
 	/*
@@ -19,18 +24,18 @@ public class MainActivity2 extends Activity {
 		// TODO 自動生成されたメソッド・スタブ
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		findViews();
 		setListeners();
-		
+
 		dbAdapter = new DBAdapter(this);
 		listAdapter = new NoteListAdapter();
 		itemListView.setAdapter(listAdapter);
-		
+
 		loadNote();
 	}
-	
-	
+
+
 	protected void findViews() {
 		itemListView = (ListView)findViewById(R.id.listKami);
 //		listtext = (TextView)findViewById(R.id.list_text);

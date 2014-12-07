@@ -1,24 +1,32 @@
 package pokazon.jp;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+/**
+ * 「カメラまたは画像」を選択する画面
+ * @author XXXX
+ *
+ */
 public class SelectActivity2 extends Activity implements View.OnClickListener{
 
 	private static final int REQUEST_CODE = 0;
@@ -26,10 +34,21 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 	private static final int REQUEST_CAPTURE_IMAGE = 100;
 	private static final int REQUEST_SELECT_IMAGE = 200;
 
+	// 画像縦横反転時のIntent消失退避処理用キー定数
+	private static final String KEY_IMAGE_URI = "KEY_IMAGE_URI";
+
+    // 選択中の紙芝居番号、ページ番号
+    private int _kamiID = -1;
+    private int _page = -1;
+
+
 	private ImageView _imageView;
 	private TextView _text;
 	// カメラ撮影または、画像選択からの画像イメージを保持する変数
 	private Bitmap dispImage;
+	// カメラ画像またはギャラリー選択画像のファイルパスを保持するインスタンス変数
+	Uri _imageUri;
+	String _imagefilePath = "_imagefilePath初期値";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +65,9 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 	protected void onResume() {
 		// TODO 自動生成されたメソッド・スタブ
 		super.onResume();
-		Intent i = getIntent();
-		Integer no = i.getIntExtra("kpage", -1);
+		Intent intent = getIntent();
+		this._page = intent.getIntExtra("page", -1);
+		this._kamiID = intent.getIntExtra("kamiID", -1);
 
 		// しゃしんをえらぶ
 		ImageButton photoSelect = (ImageButton)findViewById(R.id.imageButton1);
@@ -56,49 +76,68 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 		ImageButton camera = (ImageButton)findViewById(R.id.imageButton4);
 		camera.setOnClickListener(this);
 
-		// しゃしんをえらぶ
+		// ものがたりをつくる
+		ImageButton imageButton3 = (ImageButton)findViewById(R.id.imageButton3);
+		imageButton3.setOnClickListener(this);
+
+		// けってい
 		ImageButton kettei = (ImageButton)findViewById(R.id.imageButtonKettei);
 		kettei.setOnClickListener(this);
 
 		_text = (TextView)findViewById(R.id.pageIdx);
-		_imageView = (ImageView)findViewById(R.id.imageView1);
+		_imageView = (ImageView)findViewById(R.id.pageView);
 
-		_text.setText(no + " まいめ");
+		_text.setText(this._page + " まいめ");
 
 	}
 
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
 		// パスを取るためだけのコード
-		if(requestCode == REQUEST_GALLERY && resultCode == RESULT_OK) {
-			// ContentResolver経由でファイルパスを取得
-			ContentResolver cr = getContentResolver();
-			String[] columns = {MediaStore.Images.Media.DATA};
-			Cursor c = cr.query(data.getData(), columns, null, null, null);
-			int column_index = c.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-			c.moveToFirst();
-			String path = c.getString(column_index);
-			Log.v("test", "path=" + path);
+		if(requestCode == REQUEST_GALLERY && resultCode == Activity.RESULT_OK) {
+//			// ContentResolver経由でファイルパスを取得
+//			ContentResolver cr = getContentResolver();
+//			String[] columns = {MediaStore.Images.Media.DATA};
+//			Cursor contentCursor = cr.query(data.getData(), columns, null, null, null);
+//			int column_index = contentCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+//			contentCursor.moveToFirst();
+//			String path = contentCursor.getString(column_index);
+//			Log.v("test", "path=" + path);
 
 
 			// C# コード基準で打ち込んだコード
-			Uri uri = data.getData();
-			_imageView.setImageURI(uri);
-			String path2 = GetPathToImage(uri);
-			Toast.makeText(this, path2, Toast.LENGTH_SHORT).show();
-			Log.v("C#", "path=" + path2);
+			_imageUri = data.getData();
+//			_imageView.setImageURI(_imageUri);
+			_imagefilePath = GetPathToImage(_imageUri);
+//			Toast.makeText(this, _imagefilePath, Toast.LENGTH_SHORT).show();
+			Log.v("C#", "path=" + _imagefilePath);
 
-			// uri から画像を取得するメソッド
-			dispImage = BitmapFactory.decodeFile(path2);
+			// uri文字列 から画像を取得するメソッド
+			dispImage = BitmapFactory.decodeFile(_imagefilePath);
 			_imageView.setImageBitmap(dispImage);
 
+            Log.d("-SelectActivity2:ギャラリー- _imagefilePath = ", _imagefilePath);
 			}
 		// カメラ撮影からの戻り時
-		if(REQUEST_CAPTURE_IMAGE == requestCode && resultCode == Activity.RESULT_OK) {
-			Bitmap capturedImage = (Bitmap) data.getExtras().get("data");
-			dispImage = Bitmap.createScaledBitmap(capturedImage, 670, 480, false);
+		else if(REQUEST_CAPTURE_IMAGE == requestCode && resultCode == Activity.RESULT_OK) {
+//			Bitmap capturedImage = (Bitmap) data.getExtras().get("data");
+//			dispImage = Bitmap.createScaledBitmap(capturedImage, 670, 480, false);
+//			_imageView.setImageBitmap(dispImage);
+
+			// uri文字列 から画像を取得するメソッド
+//			_imageView.setImageURI(_imageUri);
+//			_imagefilePath = GetPathToImage(_imageUri);
+			_imagefilePath = _imageUri.getPath();
+            Log.d("-SelectActivity2:Camera- _imagefilePath = ", _imagefilePath);
+			dispImage = BitmapFactory.decodeFile(_imagefilePath);
+
+			// 画像の大きさ変更
+			dispImage = this.changeImageSize(dispImage);
 			_imageView.setImageBitmap(dispImage);
+			// カメラ画像のファイルパスを取得（_imageUriを保持しているので使わないかも）
+			_imagefilePath = _imageUri.getPath();
 		}
 	/*	super.onActivityResult(requestCode, resultCode, data);
 		if(requestCode == REQUEST_CODE) {
@@ -135,7 +174,7 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 
 		case R.id.imageButton2: // おわり
 			break;
-		case R.id.imageButtonKettei:
+		case R.id.imageButtonKettei: // 決定ボタン
 
 			// 返すデータ(Intent&Bundle)の作成
 			intent = new Intent(this, MainActivity.class);
@@ -143,13 +182,23 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 //			bundle.putParcelable("dispImge", dispImage);
 //			intent.putExtras(b);
 
+/*
 			// 画像のbitmapをbyte配列にしてIntentにセットする
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			dispImage.compress(CompressFormat.PNG, 100, baos);
 			byte[] bytes = baos.toByteArray();
 			bundle = new Bundle();
 			bundle.putByteArray("dispImage", bytes );
+*/
+			// 画像のフルパスStringもセット
+			bundle.putString("imagefilePath", _imagefilePath);
+
+			// 紙芝居番号、ページ番号もセット
+			bundle.putInt("kamiID", this._kamiID);
+			bundle.putInt("page", this._page);
+
 			intent.putExtras(bundle);
+            Log.d("-SelectActivity2:Kettei- _imagefilePath = ", _imagefilePath);
 
 //			intent.putExtra("dispImge", dispImage);
 			setResult(RESULT_OK, intent);
@@ -159,11 +208,28 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 			break;
 
 		case R.id.imageButton3: // ものがたりをつくる
+			// ものがたりをつくる
+			Intent intent3 = new Intent(SelectActivity2.this,TextToSpeech3.class);
+			Bundle bundle3 = new Bundle();
+			// 画像のフルパスStringもセット
+			bundle3.putString("imagefilePath", _imagefilePath);
+
+			// 紙芝居番号、ページ番号もセット
+			bundle3.putInt("kamiID", this._kamiID);
+			bundle3.putInt("page", this._page);
+
+			intent3.putExtras(bundle3);
+			startActivity(intent3);
 			break;
 		case R.id.imageButton4: // カメラ
+			// カメラ画像用ファイル準備
+//			String filename = "/mnt/sdcard/xxx.jpg";
+//			_imageUri = Uri.fromFile(new File(filename));
+			this._imageUri = this.makeCameraFileName();
 			// カメラ起動
-			Intent intent4 = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			startActivityForResult(intent4, REQUEST_CAPTURE_IMAGE);
+			Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+			intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, _imageUri);
+			startActivityForResult(intentCamera, REQUEST_CAPTURE_IMAGE);
 			break;
 		}
 
@@ -189,7 +255,60 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 
 	}
 
+	/**
+	 * カメラ保存用のUrlを生成するメソッド
+	 * @return
+	 */
+	private Uri makeCameraFileName(){
+		final Date date = new Date(System.currentTimeMillis());
+		final SimpleDateFormat dataFormat = new SimpleDateFormat("'IMG'_yyyyMMdd_HHmmss");
+		final String filename = dataFormat.format(date) + ".jpg";
+        Log.d("-SelectActivity2:makeCameraFileName- filename = ", filename);
+		Uri saveUri =
+		        Uri.fromFile(new File(Environment.getExternalStorageDirectory().toString()
+		                + "/DCIM/Camera", filename));
 
+		return saveUri;
+	}
 
+    /**
+     * 状態を保持する
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(KEY_IMAGE_URI, this._imageUri);
+    }
+
+    /**
+     * 保持した状態を元に戻す
+     */
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        this._imageUri = (Uri) savedInstanceState.get(KEY_IMAGE_URI);
+        // setImageView();
+    }
+
+    /**
+     * bitmapを拡大縮小する
+     * @param bmpSrc
+     * @return
+     */
+    private Bitmap changeImageSize (Bitmap bmpSrc ){
+        // 画像の大きさを最適化する
+    	Resources r = getResources();
+    	Bitmap bmpRsz;
+    	Matrix matrix = new Matrix();
+
+    	// 拡大比率
+    	float rsz_ratio_w = (float) 0.5;
+    	float rsz_ratio_h = (float) 0.5;
+    	// 比率をMatrixに設定
+    	matrix.postScale( rsz_ratio_w, rsz_ratio_h );
+    	// リサイズ画像
+    	bmpRsz = Bitmap.createBitmap(bmpSrc, 0, 0, bmpSrc.getWidth(),bmpSrc.getHeight(), matrix,true);
+    	return bmpRsz;
+    }
 
 }

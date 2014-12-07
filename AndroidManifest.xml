@@ -5,14 +5,18 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="13"
         android:targetSdkVersion="17" />
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppBaseTheme" >
+        android:theme="@style/AppBaseTheme"
+        android:hardwareAccelerated="false"
+
+     >
         <activity
             android:name=".Home"
             android:label="@string/app_name"
@@ -34,6 +38,21 @@
         <activity android:name=".suraid"
         	android:screenOrientation="landscape">
         </activity>
+    	<activity android:name=".KousinActivity" android:label="@string/app_name"
+        	android:screenOrientation="landscape">
+    		<intent-filter>
+    			<action android:name="android.intent.action.MAIN"></action>
+    			<category android:name="android.intent.category.LUNCHER"></category>
+    		</intent-filter>
+    	</activity>
+    	<activity android:name=".TextToSpeech3" android:label="@string/app_name"
+        	android:screenOrientation="landscape">
+    		<intent-filter>
+    			<action android:name="android.intent.action.MAIN"></action>
+    			<category android:name="android.intent.category.LUNCHER"></category>
+    		</intent-filter>
+    	</activity>
+
 
     </application>
 

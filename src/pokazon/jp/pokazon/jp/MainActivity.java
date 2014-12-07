@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,13 +15,21 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+/**
+ * 紙芝居をつくるページ一覧画面
+ * @author
+ *
+ */
 public class MainActivity extends Activity implements View.OnClickListener ,OnItemClickListener{
 
 	//
 
     private static final int REQUEST_GALLERY = 0;
 	private static final int REQUEST_SELECT_IMAGE = 200;
-    private ImageView imgView;
+    private ImageView imgViewKuroneko;
+
+    // 選択中の紙芝居番号
+    private int _kamiID = -1;
 
     //SQLiteデータベース空間を操作するインスタンス変数を宣言
     SQLiteDatabase sdb = null;
@@ -64,12 +72,17 @@ public class MainActivity extends Activity implements View.OnClickListener ,OnIt
 		ListView lstKami = (ListView)findViewById(R.id.listKami);
 		lstKami.setOnItemClickListener(this);
 
-	    //ListViewにDBの値をセット
+		// 前の画面から紙芝居番号を受け取る
+		Intent intent = getIntent();
+		Bundle bundle = intent.getExtras();
+		_kamiID = bundle.getInt("kamiID");
+
+		//ListViewにDBの値をセット
 	    this.setDBValueList(lstKami);
 
 
 
-        imgView = (ImageView)findViewById(R.id.imageView);
+        imgViewKuroneko = (ImageView)findViewById(R.id.imageView);
 
         // クラスのフィールド変数が NULL なら、データベース空間をオープン
         if(sdb == null) {
@@ -89,21 +102,47 @@ public class MainActivity extends Activity implements View.OnClickListener ,OnIt
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_SELECT_IMAGE  && resultCode == RESULT_OK){
+        	// 画像選択画面からの戻り
              try {
                  // InputStream in = getContentResolver().openInputStream(data.getData());
                  // Bitmap img = BitmapFactory.decodeStream(in);
                  // in.close();
-            	 Bundle buble = data.getExtras();
-            	 byte[] bytes = buble.getByteArray("dispImage");
+            	 Bundle bundle = data.getExtras();
+
+            	 // 紙芝居番号、ページ番号を取得
+            	 int _kamiID = bundle.getInt("kamiID");
+            	 int page = bundle.getInt("page");
+/*
+            	 // 選択した画像のファイルパスを取得し、Bitmapを生成
+            	 String filepath = bundle.getString("imagefilePath");
+            	 Bitmap bmp = null;
+            	 if(filepath != null){
+            		 bmp = BitmapFactory.decodeFile(filepath);
+            		 bmp = this.changeImageSize(bmp, (float)0.2, (float)0.2);
+            	 }
+*/
+            	 // 選択した画像のファイルパスをSQLiteに保存
+            	 String filepath = bundle.getString("imagefilePath");
+            	 this.helper.UpdatePhoto1(sdb, page, _kamiID, filepath);
+
+
+         		//リスト
+         		ListView lstKami = (ListView)findViewById(R.id.listKami);
+         		lstKami.setOnItemClickListener(this);
+         		//ListViewにDBの値をセット
+         	    this.setDBValueList(lstKami);
+
+/*
+            	 byte[] bytes = bundle.getByteArray("dispImage");
 
             	 Bitmap bmp = null;
             	 if (bytes != null) {
             		 bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             	 }
-
-
             	 //選択した画像を表示
                  imgView.setImageBitmap(bmp);
+*/
+
 
              } catch(Exception e) {
 
@@ -146,9 +185,6 @@ public class MainActivity extends Activity implements View.OnClickListener ,OnIt
 //		case R.id.btnList:
 //			Log.d("MainActivity","リスト作成");
 
-
-
-
 //			break;
 //			}
 
@@ -173,8 +209,10 @@ public class MainActivity extends Activity implements View.OnClickListener ,OnIt
 		// 何行目を選択したか記憶
 		this.lastPosition = position;
 
+		// ページ番号を紙芝居番号を次の画面に送る
 		Intent onICIntent = new Intent(this,SelectActivity2.class);
-		onICIntent.putExtra("kpage",selectedID);
+		onICIntent.putExtra("kamiID",this._kamiID);
+		onICIntent.putExtra("page",selectedID);
 
 		int requestCode = REQUEST_SELECT_IMAGE;
 		startActivityForResult(onICIntent, requestCode);
@@ -187,9 +225,6 @@ public class MainActivity extends Activity implements View.OnClickListener ,OnIt
 
 		SQLiteCursor cursor = null;
 
-		Intent intent = getIntent();
-		String no = intent.getStringExtra("title");
-
 		// クラスのフィールド変数がNULLなら、データベース空間をオープンン
 		if(sdb == null) {
 			helper = new MySQLiteOpenHelper(getApplicationContext());
@@ -201,17 +236,17 @@ public class MainActivity extends Activity implements View.OnClickListener ,OnIt
 			Log.e("ERROR", e.toString());
 		}
 		// MySQLiteOpenHelperにSELECT文を実行させて結果のカーソルを受け取る
-		cursor = this.helper.selectPhoto1(sdb,no);
+		cursor = this.helper.selectPhoto1(sdb,_kamiID);
 
 		//dblayout: ListViewにさらにレイアウトを指定するもの
 //		int db_layout = android.R.layout.simple_list_item_activated_1;
-		int db_layout = R.layout.list_item_sample;
+		int db_layout = R.layout.kamilist_item;
 
 
 		//from: カーソルからListviewに指定するカラムの値を指定するもの
-		String[] from = {"page"};
+		String[] from = {"page", "pass"};
 		//to: Lisetviewの中に指定したdb_layoutに配置する、各行のview部品のid
-		int[] to = new int[]{android.R.id.text1};
+		int[] to = new int[]{ R.id.text_sample, R.id.icon_sample };
 
 		//ListViewにセットするアダプターを生成
 		//カーソルをもとに、fromの列から、toのViewへ値のマッピングがおこなわれる。
@@ -266,6 +301,26 @@ public class MainActivity extends Activity implements View.OnClickListener ,OnIt
 	    listView.setAdapter(customAdapater);
 		*/
 	}
+
+    /**
+     * bitmapを拡大縮小する
+     * @param bmpSrc
+     * @return
+     */
+    private Bitmap changeImageSize (Bitmap bmpSrc, float rsz_ratio_w, float rsz_ratio_h ){
+        // 画像の大きさを最適化する
+    	Bitmap bmpRsz;
+    	Matrix matrix = new Matrix();
+
+    	// 拡大比率
+//    	float rsz_ratio_w = (float) 0.5;
+//    	float rsz_ratio_h = (float) 0.5;
+    	// 比率をMatrixに設定
+    	matrix.postScale( rsz_ratio_w, rsz_ratio_h );
+    	// リサイズ画像
+    	bmpRsz = Bitmap.createBitmap(bmpSrc, 0, 0, bmpSrc.getWidth(),bmpSrc.getHeight(), matrix,true);
+    	return bmpRsz;
+    }
 
 
 }

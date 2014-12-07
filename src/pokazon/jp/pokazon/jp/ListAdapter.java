@@ -10,39 +10,40 @@ import android.widget.TextView;
 
 
 /**
+ * 未使用
  * CursorAdapter を拡張して Cursor の内容を ListView にセット
  * @author student
  *
  */
 
 public class ListAdapter extends CursorAdapter {
-	
+
 	private LayoutInflater mInflater;
-	
+
 	class ViewHolder {
 		TextView id;
 		TextView place_id;
 		TextView place;
 		TextView url;
 	}
-	
+
 	/*
-	 * 
+	 *
 	 */
 	public ListAdapter(Context context, Cursor c, boolean autoRequery){
 		super(context, c, autoRequery);
 		mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
-	
-	
+
+
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
 		// View を再利用してデータをセット
 		ViewHolder holder = (ViewHolder)view.getTag();
-		
+
 		// Cursor からデータを取り出します
-		
-		
+
+
 	}
 
 

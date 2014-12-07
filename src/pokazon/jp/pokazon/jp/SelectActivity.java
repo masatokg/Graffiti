@@ -23,7 +23,7 @@ import android.widget.ImageView;
 
 
 /**
- * 
+ * 注意：未使用
  * @author Hokazono,Tada
  *
  */
@@ -47,7 +47,7 @@ public class SelectActivity extends Activity implements View.OnClickListener{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		Log.d("SelectActivity","onCreate");
-		
+
 		// ウィンドウマネージャのインスタンス取得
 		WindowManager manager = (WindowManager) getSystemService(WINDOW_SERVICE);
 		// ディスプレイのインスタンスを生成
@@ -145,7 +145,7 @@ public class SelectActivity extends Activity implements View.OnClickListener{
 		imageButton2 = (ImageButton)findViewById(R.id.imageButton2);
 		imageButton3 = (ImageButton)findViewById(R.id.imageButton3);
 		imageButton4 = (ImageButton)findViewById(R.id.imageButton4);
-		imageView1 = (ImageView)findViewById(R.id.imageView1);
+		imageView1 = (ImageView)findViewById(R.id.pageView);
 
 	}
 

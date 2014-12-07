@@ -10,12 +10,6 @@
         android:orientation="horizontal"
         android:gravity="center_vertical" >
 
-        <ImageView
-            android:id="@+id/icon_sample"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical" />
-
         <TextView
             android:id="@+id/text_sample"
             android:layout_width="wrap_content"
@@ -23,6 +17,12 @@
             android:minHeight="50dp"
             android:gravity="center_vertical"
             android:textSize="20sp" />
-    </LinearLayout>
+
+        <ImageView
+            android:id="@+id/icon_sample"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical" />
+     </LinearLayout>
 
 </LinearLayout>
