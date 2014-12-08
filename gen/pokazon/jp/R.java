@@ -65,15 +65,15 @@ public final class R {
         public static final int LinearLayout2=0x7f090007;
         public static final int LinearLayout3=0x7f09001e;
         public static final int RelativeLayout1=0x7f090021;
-        public static final int action_settings=0x7f09002e;
-        public static final int btn1=0x7f09002d;
-        public static final int btn2=0x7f09002c;
+        public static final int action_settings=0x7f090030;
         public static final int btnCamera=0x7f09000e;
         public static final int btnGallery=0x7f09000d;
         public static final int btnList=0x7f090006;
+        public static final int btnSpeach=0x7f09002b;
+        public static final int btnSpeachBack=0x7f09002d;
+        public static final int btnSpeachUpdate=0x7f09002e;
         public static final int btn_camera=0x7f090004;
         public static final int btn_library=0x7f090005;
-        public static final int button=0x7f09002b;
         public static final int button1=0x7f090025;
         public static final int button2=0x7f090024;
         public static final int customDlg_title=0x7f090015;
@@ -107,6 +107,8 @@ public final class R {
         public static final int photoIndex=0x7f09001a;
         public static final int textView=0x7f090001;
         public static final int text_sample=0x7f09001f;
+        public static final int tvSpeachKamishibaiName=0x7f09002c;
+        public static final int tvSpeachKamishibaiPage=0x7f09002f;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;

@@ -14,7 +14,7 @@
     </EditText>
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/btnSpeach"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="よみあげ" />
@@ -28,33 +28,48 @@
             android:layout_width="match_parent"
             android:layout_height="152dp" >
 
-            <Button
-                android:id="@+id/btn2"
+            <TextView
+                android:id="@+id/tvSpeachKamishibaiName"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:text="かみしばい：" />
+
+            <Button
+                android:id="@+id/btnSpeachBack"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="45dp"
-                android:text="ほぞん" />
+                android:layout_marginRight="137dp"
+                android:text="もどる" />
 
             <Button
-                android:id="@+id/btn1"
-                android:layout_width="wrap_content"
+                android:id="@+id/btnSpeachUpdate"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/btn2"
-                android:layout_alignBottom="@+id/btn2"
-                android:layout_marginRight="70dp"
-                android:layout_toLeftOf="@+id/btn2"
-                android:text="へんしゅう" />
+                android:layout_alignBaseline="@+id/btnSpeachBack"
+                android:layout_alignBottom="@+id/btnSpeachBack"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="24dp"
+                android:text="かきかえ" />
 
             <ImageView
                 android:id="@+id/pageView"
                 android:layout_width="230dp"
                 android:layout_height="120dp"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="18dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight="31dp"
+                android:layout_toLeftOf="@+id/btnSpeachBack"
                 android:src="@drawable/ic_launcher" />
+
+            <TextView
+                android:id="@+id/tvSpeachKamishibaiPage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/tvSpeachKamishibaiName"
+                android:layout_alignParentBottom="true"
+                android:text="まいめ" />
 
         </RelativeLayout>
 

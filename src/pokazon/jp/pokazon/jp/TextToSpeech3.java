@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class TextToSpeech3  extends Activity implements View.OnClickListener,
@@ -43,10 +44,11 @@ public class TextToSpeech3  extends Activity implements View.OnClickListener,
 
 		Intent intent = getIntent();
 		Bundle bundle = intent.getExtras();
-	   // 紙芝居番号、ページ番号を取得
-	   _kamiID = bundle.getInt("kamiID");
-	   _page = bundle.getInt("page");
-
+		// 紙芝居番号、ページ番号を取得
+		_kamiID = bundle.getInt("kamiID");
+	   	_page = bundle.getInt("page");
+		TextView kamishibai = (TextView) findViewById(R.id.tvSpeachKamishibaiName);
+		TextView kamishibaiPage = (TextView) findViewById(R.id.tvSpeachKamishibaiPage);
 
 		// レイアウトを設定する
 		 setContentView(R.layout.texttospeech3);
@@ -55,15 +57,15 @@ public class TextToSpeech3  extends Activity implements View.OnClickListener,
 		 mEditText = (EditText) findViewById(R.id.editText);
 
 		 // ボタン押したら入力されたテキストを読み上げるリスナー
-		 Button button = (Button) findViewById(R.id.button);
-		 button.setOnClickListener(this);
+		 Button btnSpeach = (Button) findViewById(R.id.btnSpeach);
+		 btnSpeach.setOnClickListener(this);
 
-		 Button btn1 = (Button)findViewById(R.id.btn1);
-		 btn1.setOnClickListener(this);
+		 Button btnSpeachEdit = (Button)findViewById(R.id.btnSpeachUpdate);
+		 btnSpeachEdit.setOnClickListener(this);
 
 
-		 Button btn2 = (Button)findViewById(R.id.btn2);
-		 btn2.setOnClickListener(this);
+		 Button btnSpeachSave = (Button)findViewById(R.id.btnSpeachBack);
+		 btnSpeachSave.setOnClickListener(this);
 
 		 // 該当するページの画像を表示する
 		 ImageView pageView = (ImageView)findViewById(R.id.pageView);
@@ -79,6 +81,9 @@ public class TextToSpeech3  extends Activity implements View.OnClickListener,
 		   		 bmp = this.changeImageSize(bmp, (float)1.2, (float)1.2);
 		   		pageView.setImageBitmap(bmp);
 			}
+			String kaminame = helper.selectKamishibaiNmae(sdb, _kamiID);
+			kamishibai.setText("かみしばい： " + kaminame);
+			kamishibaiPage.setText(_page + " まいめ");
 		}catch(SQLiteException e){
 
 			return;
@@ -97,47 +102,56 @@ public class TextToSpeech3  extends Activity implements View.OnClickListener,
 
 	@Override
 	public void onClick(View v) {
-	 if (mTextToSpeech == null) {
-		 // 初回はテキスト読み上げ可能かチェックする
-		 Intent checkIntent = new Intent();
-		 checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-		 startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
-	 } else {
-		// テキストを読み上げる
-		 speech();
-		 }
-		Intent intent = null;
-		switch(v. getId()){
-			case R.id.btn2:
 
+		Intent intent = null;
+		// ボタン別処理
+		switch(v. getId()){
+			// よみあげ
+			case R.id.btnSpeach: {
+				if (mTextToSpeech == null) {
+				 	// 初回はテキスト読み上げ可能かチェックする
+				 	Intent checkIntent = new Intent();
+				 	checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+				 	startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+			 	}else {
+			 		// テキストを読み上げる
+			 		speech();
+				}
+				break;
+			}
+			// もどる
+			case R.id.btnSpeachBack:{
+
+				finish();
+//				intent = new Intent(TextToSpeech3.this,KousinActivity.class);
+//				startActivity(intent);
+				break;
+			}
+			// かきかえ
+			case R.id.btnSpeachUpdate:{
 				EditText etv = (EditText)findViewById(R.id.editText);
 				String inputMsg = etv.getText().toString();
-				Toast.makeText(TextToSpeech3.this,"さくせいしました",Toast.LENGTH_SHORT).show();
-
+				Toast.makeText(TextToSpeech3.this,"かきかえました",Toast.LENGTH_SHORT).show();
 
 				if(inputMsg!=null && !inputMsg.isEmpty())
 				{
-					helper.insertSerifu(sdb,inputMsg);
+					// 読み上げテキストを保存
+					// helper.insertSerifu(sdb,inputMsg);
+					helper.UpdatePhoto1Yomi(sdb, _page, _kamiID, inputMsg);
 				}
-
-				etv.setText("");
+				// etv.setText("");
 				break;
-
-
-			case R.id.btn1:
-				intent = new Intent(TextToSpeech3.this,KousinActivity.class);
-				startActivity(intent);
-				break;
+			}
 		}
 	 }
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-	// テキスト読み上げ可能チェックから戻った場合
-	 if (requestCode == MY_DATA_CHECK_CODE) {
-		 if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-			  // 音声リソースが見つかったので TextToSpeech を開始する (-> onInit)
-			 mTextToSpeech = new TextToSpeech(this, this);
-		 } else {
+		// テキスト読み上げ可能チェックから戻った場合
+		 if (requestCode == MY_DATA_CHECK_CODE) {
+			 if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+				  // 音声リソースが見つかったので TextToSpeech を開始する (-> onInit)
+				 mTextToSpeech = new TextToSpeech(this, this);
+			 } else {
 			// 音声リソースがなければダウンロードする
 			 Intent installIntent = new Intent();
 			 installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);

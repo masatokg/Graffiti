@@ -237,6 +237,35 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	/**
+	 *  紙芝居番号で検索して紙芝居名を受け取る
+	 * @param db
+	 * @param _id
+	 * @return String 紙芝居名
+	 */
+	public String selectKamishibaiNmae(SQLiteDatabase db, int kamiID){
+
+		String rtStr = null;
+		String sqlstr = "SELECT kname FROM Kamishibai where _id = " + kamiID + " ;" ;
+		Log.d("selectKamishibaiNmae",sqlstr);
+		try{
+			//トランザクション開始
+			SQLiteCursor cursor = (SQLiteCursor)db.rawQuery(sqlstr, null);
+			if(cursor.getCount() != 0){
+				//カーソル開始位置を先頭にする
+				cursor.moveToFirst();
+				rtStr = cursor.getString(0);
+			}
+			//カーソルをリターンするのでcloseしない → する
+			cursor.close();
+		} catch(SQLException e) {
+			Log.e("ERROR", e.toString());
+		}finally{
+			//
+		}
+		return rtStr;
+	}
+
+	/**
 	 * 紙芝居番号をもとにPhoto1テーブルを検索
 	 * @param db
 	 * @param no 紙芝居番号
@@ -335,6 +364,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 写真テーブルを紙芝居番号、ページ番号で検索し、画像ファイルパスを取得
 	 * @param db
 	 * @param kamiID
+	 * @param page
 	 * @return ファイルパス
 	 */
 	public String getFilePath(SQLiteDatabase db, int kamiID, int page){
@@ -358,6 +388,100 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper {
 			//
 		}
 		return rtString;
+	}
+
+	/**
+	 * 写真テーブルを紙芝居番号で検索し、ページの読み上げテキストのリストを取得
+	 * @param db
+	 * @param kamiID
+	 * @return ページの読み上げテキストリスト
+	 */
+	public List<String> getYomiList(SQLiteDatabase db, int kamiID){
+		List<String> rtList = new ArrayList<String>();
+
+		String sqlstr = "SELECT yomi FROM Photo1 where no = " + kamiID  + " ORDER BY page;" ;
+		Log.d("getFilePathList",sqlstr);
+		String filepath = null;
+		try{
+			//トランザクション開始
+			SQLiteCursor cursor = (SQLiteCursor)db.rawQuery(sqlstr, null);
+			if(cursor.getCount() != 0){
+				//カーソル開始位置を先頭にする
+				cursor.moveToFirst();
+				filepath = cursor.getString(0);
+				if(filepath!=null){
+					rtList.add(filepath);
+				}
+				while(cursor.moveToNext()){
+					filepath = cursor.getString(0);
+					if(filepath!=null){
+						rtList.add(filepath);
+					}
+				}
+			}
+			//カーソルをリターンするのでcloseしない → する
+			cursor.close();
+		} catch(SQLException e) {
+			Log.e("ERROR", e.toString());
+		}finally{
+			//
+		}
+		return rtList;
+	}
+
+	/**
+	 * 写真テーブルを紙芝居番号、ページ番号で検索し、ページの読み上げテキストを取得
+	 * @param db
+	 * @param kamiID
+	 * @param page
+	 * @return ページの読み上げテキスト
+	 */
+	public String getYomi(SQLiteDatabase db, int kamiID, int page){
+		String rtString = null;
+
+		String sqlstr = "SELECT yomi FROM Photo1 where no = " + kamiID  + " AND page = " + page + ";" ;
+		Log.d("getYomi",sqlstr);
+		try{
+			//トランザクション開始
+			SQLiteCursor cursor = (SQLiteCursor)db.rawQuery(sqlstr, null);
+			if(cursor.getCount() != 0){
+				//カーソル開始位置を先頭にする
+				cursor.moveToFirst();
+				rtString = cursor.getString(0);
+			}
+			//カーソルをリターンするのでcloseしない → する
+			cursor.close();
+		} catch(SQLException e) {
+			Log.e("ERROR", e.toString());
+		}finally{
+			//
+		}
+		return rtString;
+	}
+
+	/**
+	 * 写真テーブルの読み上げテキストを更新
+	 * @param db
+	 * @param page
+	 * @param kamiID
+	 * @param yomi
+	 */
+	public void UpdatePhoto1Yomi(SQLiteDatabase db, int page, int kamiID, String yomi){
+
+		String sqlstr = "UPDATE Photo1 SET yomi = '" + yomi + "' WHERE no = "+ kamiID +" AND page = " + page + " ;";
+		Log.d("UpdatePhoto1",sqlstr);
+		try{
+			//トランザクション開始
+			db.beginTransaction();
+			db.execSQL(sqlstr);
+			//トランザクション成功
+			db.setTransactionSuccessful();
+		} catch(SQLException e) {
+			Log.e("ERROR", e.toString());
+		}finally{
+			db.endTransaction();
+		}
+
 	}
 
 	public void insertSerifu (SQLiteDatabase db,String inputMsg){
