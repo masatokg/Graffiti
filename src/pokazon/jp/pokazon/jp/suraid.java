@@ -1,6 +1,7 @@
 package pokazon.jp;
 
 import java.util.List;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,16 +11,18 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-public class suraid extends Activity implements View.OnTouchListener {
+public class suraid extends Activity implements View.OnTouchListener, TextToSpeech.OnInitListener {
 
-    private ViewFlipper viewFlipper;
+	private ViewFlipper viewFlipper;
 
     // 最大ページ数はとりあえず決め打ち
     private int _pageMax = -1;
@@ -44,6 +47,12 @@ public class suraid extends Activity implements View.OnTouchListener {
     SQLiteDatabase sdb = null;
     //MySQLiteOpenHelperを操作するインスタンス変数を宣言
     MySQLiteOpenHelper helper = null;
+
+    // 読み上げスピーチロボット
+	private TextToSpeech mTextToSpeech;
+	private static int MY_DATA_CHECK_CODE = 1;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -93,29 +102,34 @@ public class suraid extends Activity implements View.OnTouchListener {
                 return true;
             case MotionEvent.ACTION_MOVE:
                 if(!isFlip) {
-                	// 右へフリップ
-                    if( (x - firstTouch > 50) && ( this._page < this._pageMax ) ) {
+                	// 右へフリップ（１つ前へ）
+                    if( (x - firstTouch > 50) && ( this._page > 1 ) ) {
                         isFlip = true;
                         viewFlipper.setInAnimation(AnimationUtils.loadAnimation(this, R.layout.move_in_left));
                         viewFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.layout.move_out_right));
-                        // 次の画像をセット
-                        String filepath = this._imagepathList.get(++this._pageIDX);
-                        this._page++;
-                        Bitmap bmp = this.getBitmapImage(filepath, this._rsz_ratio_w, this._rsz_ratio_h);
-                        _secondImageView.setImageBitmap(bmp);
-                        viewFlipper.showNext();
-                    }
-                	// 左へフリップ
-                    else if( (firstTouch - x > 50) && ( this._page > 1 )) {
-                        isFlip = true;
-                        viewFlipper.setInAnimation(AnimationUtils.loadAnimation(this, R.layout.move_in_right));
-                        viewFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.layout.move_out_left));
                         // １つ前の画像をセット
                         String filepath = this._imagepathList.get(--this._pageIDX);
                         this._page--;
                         Bitmap bmp = this.getBitmapImage(filepath, this._rsz_ratio_w, this._rsz_ratio_h);
                         _firstImageView.setImageBitmap(bmp);
+
                         viewFlipper.showPrevious();
+                    }
+                	// 左へフリップ(次へ)
+                    else if( (firstTouch - x > 50) && (  this._page < this._pageMax)) {
+                        isFlip = true;
+                        viewFlipper.setInAnimation(AnimationUtils.loadAnimation(this, R.layout.move_in_right));
+                        viewFlipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.layout.move_out_left));
+                        // 次の画像をセット
+                        String filepath = this._imagepathList.get(++this._pageIDX);
+                        this._page++;
+                        Bitmap bmp = this.getBitmapImage(filepath, this._rsz_ratio_w, this._rsz_ratio_h);
+                        _secondImageView.setImageBitmap(bmp);
+
+                        // テキストを読み上げさせる
+                        speachMethod();
+
+                        viewFlipper.showNext();
                     }
                 }
                 break;
@@ -191,4 +205,73 @@ public class suraid extends Activity implements View.OnTouchListener {
     	bmpRsz = Bitmap.createBitmap(bmpSrc, 0, 0, bmpSrc.getWidth(),bmpSrc.getHeight(), matrix,true);
     	return bmpRsz;
     }
+
+    /**
+     * 読み上げ処理
+     */
+    private void speachMethod(){
+
+    	// DBから今の紙芝居のページのテキストを取得
+    	String message = helper.getYomi(sdb, _kamiID, _page);
+
+		if (mTextToSpeech == null) {
+		 	// 初回はテキスト読み上げ可能かチェックする
+		 	Intent checkIntent = new Intent();
+		 	checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+		 	startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+	 	}else {
+	 		// テキストを読み上げる
+	 		speech(message);
+		}
+
+
+    }
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// テキスト読み上げ可能チェックから戻った場合
+		 if (requestCode == MY_DATA_CHECK_CODE) {
+			 if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+				  // 音声リソースが見つかったので TextToSpeech を開始する (-> onInit)
+				 mTextToSpeech = new TextToSpeech(this, this);
+			 } else {
+			// 音声リソースがなければダウンロードする
+			 Intent installIntent = new Intent();
+			 installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+			 startActivity(installIntent);
+		 	}
+		 }
+	 }
+	@Override
+	public void onInit(int status) {
+		 if (status == TextToSpeech.SUCCESS) {
+			 // 日本語に対応していれば日本語に設定する （無くても良い）
+			 Locale locale = Locale.JAPANESE;
+			 if (mTextToSpeech.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) {
+				 mTextToSpeech.setLanguage(locale);
+			 } else {
+				 Toast.makeText(this, "It does not support the Japanese.", Toast.LENGTH_SHORT).show();
+			 }
+		    // DBから今の紙芝居のページのテキストを取得
+		    String message = helper.getYomi(sdb, _kamiID, _page);
+			 // テキストを読み上げる
+			 speech(message);
+		 } else {
+			 Toast.makeText(this, "TextToSpeech is not supported.", Toast.LENGTH_SHORT).show();
+		 }
+	}
+
+	/**
+	 * 渡されたメッセージを読み上げる
+	 * @param message
+	 */
+	private void speech(String message) {
+		 // テキスト読み上げ中であれば停止する
+		 if (mTextToSpeech.isSpeaking()) {
+			 mTextToSpeech.stop();
+		 }
+		 // テキストを読み上げる
+		 mTextToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null);
+	}
+
 }

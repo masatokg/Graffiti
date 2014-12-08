@@ -42,16 +42,19 @@ public class TextToSpeech3  extends Activity implements View.OnClickListener,
 		// TODO 自動生成されたメソッド・スタブ
 		super.onResume();
 
-		Intent intent = getIntent();
+		// レイアウトを設定する
+		 setContentView(R.layout.texttospeech3);
+
+	    Intent intent = getIntent();
+		this._page = intent.getIntExtra("page", -1);
+		this._kamiID = intent.getIntExtra("kamiID", -1);
+
 		Bundle bundle = intent.getExtras();
 		// 紙芝居番号、ページ番号を取得
 		_kamiID = bundle.getInt("kamiID");
 	   	_page = bundle.getInt("page");
 		TextView kamishibai = (TextView) findViewById(R.id.tvSpeachKamishibaiName);
 		TextView kamishibaiPage = (TextView) findViewById(R.id.tvSpeachKamishibaiPage);
-
-		// レイアウトを設定する
-		 setContentView(R.layout.texttospeech3);
 
 		 // 読み上げるメッセージの入力ボックスを取得する
 		 mEditText = (EditText) findViewById(R.id.editText);
@@ -122,9 +125,19 @@ public class TextToSpeech3  extends Activity implements View.OnClickListener,
 			// もどる
 			case R.id.btnSpeachBack:{
 
+				// 返すデータ(Intent&Bundle)の作成
+				intent = new Intent(this, SelectActivity2.class);
+				Bundle bundle = new Bundle();
+
+				// 紙芝居番号、ページ番号もセット
+				bundle.putInt("kamiID", this._kamiID);
+				bundle.putInt("page", this._page);
+
+				intent.putExtras(bundle);
 				finish();
 //				intent = new Intent(TextToSpeech3.this,KousinActivity.class);
 //				startActivity(intent);
+
 				break;
 			}
 			// かきかえ

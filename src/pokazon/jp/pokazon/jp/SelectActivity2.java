@@ -9,6 +9,8 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -33,6 +35,7 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 	private static final int REQUEST_GALLERY = 0;
 	private static final int REQUEST_CAPTURE_IMAGE = 100;
 	private static final int REQUEST_SELECT_IMAGE = 200;
+	private static final int REQUEST_MAKE_STRY = 300;
 
 	// 画像縦横反転時のIntent消失退避処理用キー定数
 	private static final String KEY_IMAGE_URI = "KEY_IMAGE_URI";
@@ -49,6 +52,11 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 	// カメラ画像またはギャラリー選択画像のファイルパスを保持するインスタンス変数
 	Uri _imageUri;
 	String _imagefilePath = "_imagefilePath初期値";
+
+	//SQLiteデータベース空間を操作するインスタンス変数を宣言
+    SQLiteDatabase sdb = null;
+    //MySQLiteOpenHelperを操作するインスタンス変数を宣言
+    MySQLiteOpenHelper helper = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +97,22 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 
 		_text.setText(this._page + " まいめ");
 
+		// クラスのフィールド変数がNULLなら、データベース空間をオープンン
+		if(sdb == null) {
+			helper = new MySQLiteOpenHelper(getApplicationContext());
+		}
+		try{
+			sdb = helper.getWritableDatabase();
+		} catch(SQLiteException e){
+			// 異常終了
+			Log.e("ERROR", e.toString());
+		}
+		// MySQLiteOpenHelperにSELECT文を実行させて結果のカーソルを受け取る
+		String filepath  = this.helper.getFilePath(sdb,_kamiID,_page);
+
+		// uri文字列 から画像を取得するメソッド
+		dispImage = BitmapFactory.decodeFile(_imagefilePath);
+		_imageView.setImageBitmap(dispImage);
 	}
 
 
@@ -97,15 +121,6 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 
 		// パスを取るためだけのコード
 		if(requestCode == REQUEST_GALLERY && resultCode == Activity.RESULT_OK) {
-//			// ContentResolver経由でファイルパスを取得
-//			ContentResolver cr = getContentResolver();
-//			String[] columns = {MediaStore.Images.Media.DATA};
-//			Cursor contentCursor = cr.query(data.getData(), columns, null, null, null);
-//			int column_index = contentCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-//			contentCursor.moveToFirst();
-//			String path = contentCursor.getString(column_index);
-//			Log.v("test", "path=" + path);
-
 
 			// C# コード基準で打ち込んだコード
 			_imageUri = data.getData();
@@ -139,24 +154,6 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 			// カメラ画像のファイルパスを取得（_imageUriを保持しているので使わないかも）
 			_imagefilePath = _imageUri.getPath();
 		}
-	/*	super.onActivityResult(requestCode, resultCode, data);
-		if(requestCode == REQUEST_CODE) {
-			switch( resultCode) {
-			case Activity.RESULT_OK:
-				String[] projection = {MediaStore.MediaColumns.DATA};
-				String selection = null;
-				String[] selectionArgs = null;
-				String sortOrder = null;
-				Cursor cursor = getActivity().getContentResolver().query(data.getData(), projection, selection, selectionArgs, sortOrder);
-						if(cursor.getCount() == 1) {
-							cursor.moveToNext();
-							String filePath = cursor.getString(0);
-							Toast.makeText(getActivity(), filePath, Toast.LENGTH_SHORT).show();
-						}
-				break;
-			}
-		}
-		*/
 	}
 
 	@Override
@@ -179,17 +176,7 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 			// 返すデータ(Intent&Bundle)の作成
 			intent = new Intent(this, MainActivity.class);
 			Bundle bundle = new Bundle();
-//			bundle.putParcelable("dispImge", dispImage);
-//			intent.putExtras(b);
 
-/*
-			// 画像のbitmapをbyte配列にしてIntentにセットする
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			dispImage.compress(CompressFormat.PNG, 100, baos);
-			byte[] bytes = baos.toByteArray();
-			bundle = new Bundle();
-			bundle.putByteArray("dispImage", bytes );
-*/
 			// 画像のフルパスStringもセット
 			bundle.putString("imagefilePath", _imagefilePath);
 
@@ -219,8 +206,9 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 			bundle3.putInt("page", this._page);
 
 			intent3.putExtras(bundle3);
-			startActivity(intent3);
+			startActivityForResult(intent3, REQUEST_MAKE_STRY);
 			break;
+
 		case R.id.imageButton4: // カメラ
 			// カメラ画像用ファイル準備
 //			String filename = "/mnt/sdcard/xxx.jpg";
