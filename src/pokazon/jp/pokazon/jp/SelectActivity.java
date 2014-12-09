@@ -2,11 +2,14 @@ package pokazon.jp;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -67,7 +70,15 @@ public class SelectActivity extends Activity implements View.OnClickListener{
 		if (REQUEST_IMAGE_SELECT == requestCode && data!=null) {
 			Uri uri = data.getData();
 			try {
-				bitmap = loadImage(uri, viewWidth, viewHeight);
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				options.inPreferredConfig = Config.ARGB_4444;
+				options.inPurgeable = true;
+				options.inSampleSize = 2;
+				Bitmap bitmapOriginal = loadImage(uri, viewWidth, viewHeight);
+
+				bitmap = bitmapOriginal.copy(Bitmap.Config.ARGB_4444,true);
+				bitmapOriginal.recycle();
+				bitmapOriginal = null;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -89,7 +100,27 @@ public class SelectActivity extends Activity implements View.OnClickListener{
 	    // Uriから画像を読み込みBitmapを作成
 	    Bitmap originalBitmap = null;
 	    try {
-	        originalBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+	    	// original code
+	        // originalBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+
+
+
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inPreferredConfig = Config.ARGB_4444;
+			options.inPurgeable = true;
+			options.inSampleSize = 2;
+
+			InputStream inputStream = getContentResolver().openInputStream(uri);
+			originalBitmap = BitmapFactory.decodeStream(inputStream, null, options);
+//			BitmapFactory.decodeStream(inputStream, null, imageOptions);
+
+			Bitmap bitmapOriginal = loadImage(uri, viewWidth, viewHeight);
+
+			bitmap = bitmapOriginal.copy(Bitmap.Config.ARGB_4444,true);
+			bitmapOriginal.recycle();
+			bitmapOriginal = null;
+
+
 	    } catch (FileNotFoundException e) {
 	        e.printStackTrace();
 	    } catch (IOException e) {
@@ -145,7 +176,7 @@ public class SelectActivity extends Activity implements View.OnClickListener{
 		imageButton2 = (ImageButton)findViewById(R.id.imageButton2);
 		imageButton3 = (ImageButton)findViewById(R.id.imageButton3);
 		imageButton4 = (ImageButton)findViewById(R.id.imageButton4);
-		imageView1 = (ImageView)findViewById(R.id.pageView);
+		imageView1 = (ImageView)findViewById(R.id.pageViewSelect);
 
 	}
 

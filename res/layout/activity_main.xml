@@ -2,65 +2,46 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="horizontal"
-    android:weightSum="1" >
+    android:weightSum="3" >
 
     <LinearLayout
-        android:layout_width="138dp"
+        android:layout_width="0dp"
         android:layout_height="fill_parent"
-        android:layout_weight="0.33"
+        android:layout_weight="1.5"
         android:orientation="vertical" >
 
         <ListView
             android:id="@+id/listKami"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#FFFFFF"
             android:choiceMode="none" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="370dp"
+        android:layout_width="0dp"
         android:layout_height="fill_parent"
-        android:layout_weight="0.67"
-        android:orientation="vertical" >
+        android:layout_weight="1.5"
+        android:background="#FFFFFF"
+        android:orientation="vertical"
+        android:weightSum="10" >
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_height="0dp"
+            android:layout_weight="2"
             android:text="ユメちゃん"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="190dp"
-            android:layout_height="146dp"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/yume" />
+            android:layout_weight="5"
+            android:src="@drawable/nyanko" />
 
-        <LinearLayout
-            android:id="@+id/LinearLayout1"
-            android:layout_width="fill_parent"
-            android:layout_height="94dp" >
-
-            <Button
-                android:id="@+id/btn_camera"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="かめら" />
-
-            <Button
-                android:id="@+id/btn_library"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ぎゃらりー" />
-
-            <Button
-                android:id="@+id/btnList"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

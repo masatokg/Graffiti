@@ -17,9 +17,8 @@
 
         <RelativeLayout
             android:id="@+id/photoIndex"
-            android:layout_width="291dp"
-            android:layout_height="258dp"
-            android:layout_weight="0.90" >
+            android:layout_width="270dp"
+            android:layout_height="258dp" >
 
             <FrameLayout
                 android:layout_width="wrap_content"
@@ -39,7 +38,7 @@
             </FrameLayout>
 
             <ImageView
-                android:id="@+id/pageView"
+                android:id="@+id/pageViewSelect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -55,63 +54,67 @@
         android:orientation="vertical" >
 
         <RelativeLayout
-            android:layout_width="400dp"
+            android:layout_width="374dp"
             android:layout_height="272dp" >
 
             <ImageButton
                 android:id="@+id/imageButton1"
                 android:layout_width="160dp"
                 android:layout_height="60dp"
-                android:layout_marginTop="34dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
                 android:background="@null"
                 android:scaleType="fitXY"
                 android:src="@drawable/syasinsentaku_1" />
-
-            <ImageButton
-                android:id="@+id/imageButtonKettei"
-                android:layout_width="270px"
-                android:layout_height="80px"
-                android:layout_above="@+id/ImageButton01"
-                android:layout_alignParentLeft="true"
-                android:layout_marginBottom="18dp"
-                android:layout_weight="2.44"
-                android:background="@null"
-                android:scaleType="fitXY"
-                android:src="@drawable/kettei" />
-
-            <ImageButton
-                android:id="@+id/ImageButton01"
-                android:layout_width="270px"
-                android:layout_height="80px"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_weight="2.44"
-                android:background="@null"
-                android:scaleType="fitXY"
-                android:src="@drawable/owari_1" />
 
             <ImageButton
                 android:id="@+id/imageButton4"
                 android:layout_width="160dp"
                 android:layout_height="60dp"
                 android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
+                android:layout_below="@+id/imageButton1"
+                android:layout_marginTop="17dp"
                 android:background="@null"
                 android:scaleType="fitXY"
                 android:src="@drawable/camera_1" />
 
             <ImageButton
+                android:id="@+id/imageButtonOwari"
+                android:layout_width="270px"
+                android:layout_height="80px"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/imageButton4"
+                android:layout_weight="2.44"
+                android:background="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/owari_1" />
+
+            <ImageButton
                 android:id="@+id/imageButton3"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:layout_alignTop="@+id/imageButton1"
-                android:layout_toRightOf="@+id/imageButton1"
+                android:layout_alignParentTop="true"
+                android:layout_alignRight="@+id/imageButtonOwari"
+                android:layout_marginTop="15dp"
                 android:layout_weight="0.01"
                 android:background="@null"
                 android:scaleType="fitXY"
-                android:src="@drawable/tukuru_1" />
+                android:src="@drawable/tukuru" />
+
+            <ImageButton
+                android:id="@+id/imageButtonKettei"
+                android:layout_width="270px"
+                android:layout_height="80px"
+                android:layout_above="@+id/imageButtonOwari"
+                android:layout_alignLeft="@+id/imageButtonOwari"
+                android:layout_marginBottom="12dp"
+                android:layout_weight="2.44"
+                android:background="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/kettei" />
 
         </RelativeLayout>
+
     </LinearLayout>
 
 </LinearLayout>

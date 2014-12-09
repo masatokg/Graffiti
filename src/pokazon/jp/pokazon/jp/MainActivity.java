@@ -104,23 +104,13 @@ public class MainActivity extends Activity implements View.OnClickListener ,OnIt
         if (requestCode == REQUEST_SELECT_IMAGE  && resultCode == RESULT_OK){
         	// 画像選択画面からの戻り
              try {
-                 // InputStream in = getContentResolver().openInputStream(data.getData());
-                 // Bitmap img = BitmapFactory.decodeStream(in);
-                 // in.close();
+
             	 Bundle bundle = data.getExtras();
 
             	 // 紙芝居番号、ページ番号を取得
             	 int _kamiID = bundle.getInt("kamiID");
             	 int page = bundle.getInt("page");
-/*
-            	 // 選択した画像のファイルパスを取得し、Bitmapを生成
-            	 String filepath = bundle.getString("imagefilePath");
-            	 Bitmap bmp = null;
-            	 if(filepath != null){
-            		 bmp = BitmapFactory.decodeFile(filepath);
-            		 bmp = this.changeImageSize(bmp, (float)0.2, (float)0.2);
-            	 }
-*/
+
             	 // 選択した画像のファイルパスをSQLiteに保存
             	 String filepath = bundle.getString("imagefilePath");
             	 this.helper.UpdatePhoto1(sdb, page, _kamiID, filepath);
@@ -131,18 +121,6 @@ public class MainActivity extends Activity implements View.OnClickListener ,OnIt
          		lstKami.setOnItemClickListener(this);
          		//ListViewにDBの値をセット
          	    this.setDBValueList(lstKami);
-
-/*
-            	 byte[] bytes = bundle.getByteArray("dispImage");
-
-            	 Bitmap bmp = null;
-            	 if (bytes != null) {
-            		 bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-            	 }
-            	 //選択した画像を表示
-                 imgView.setImageBitmap(bmp);
-*/
-
 
              } catch(Exception e) {
 
@@ -321,6 +299,7 @@ public class MainActivity extends Activity implements View.OnClickListener ,OnIt
     	bmpRsz = Bitmap.createBitmap(bmpSrc, 0, 0, bmpSrc.getWidth(),bmpSrc.getHeight(), matrix,true);
     	return bmpRsz;
     }
+
 
 
 }

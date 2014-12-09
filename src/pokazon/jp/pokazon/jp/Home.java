@@ -169,7 +169,7 @@ public class Home extends Activity implements View.OnClickListener {
 			builder.setPositiveButton("つくる", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton){
 					// つくる ボタンクリック取得
-					EditText name = (EditText)layout.findViewById(R.id.customDlg_title);
+					EditText name = (EditText)layout.findViewById(R.id.customDlg_titleED);
 					String strname = name.getText().toString();
 					Log.d("MainActivity","トースト");
 	                //入力した文字をトースト出力する
@@ -211,7 +211,7 @@ public class Home extends Activity implements View.OnClickListener {
 			builder2.setPositiveButton("これをみる", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton){
 					// つくる ボタンクリック取得
-					EditText name = (EditText)layout2.findViewById(R.id.customDlg_title);
+					EditText name = (EditText)layout2.findViewById(R.id.customDlg_titleED);
 					String strname = name.getText().toString();
 					Log.d("MainActivity","トースト");
 	                //入力した文字をトースト出力する
@@ -273,4 +273,6 @@ public class Home extends Activity implements View.OnClickListener {
 
 		}
 	}
+
+
 }

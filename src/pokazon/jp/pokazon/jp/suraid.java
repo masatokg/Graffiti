@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Bundle;
@@ -179,7 +180,11 @@ public class suraid extends Activity implements View.OnTouchListener, TextToSpee
 	 // 選択した画像のファイルパスを取得し、Bitmapを生成
 		Bitmap bitmap = null;
 		if(filepath != null){
-			bitmap = BitmapFactory.decodeFile(filepath);
+	 		BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inPreferredConfig = Config.ARGB_4444;
+			options.inPurgeable = true;
+			options.inSampleSize = 2;
+			bitmap = BitmapFactory.decodeFile(filepath, options);
 			bitmap = this.changeImageSize(bitmap, rsz_ratio_w, rsz_ratio_h);
 		}
 

@@ -7,16 +7,15 @@
     android:padding="10dp" >
 
     <TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="かみしばいのなまえ"
-  	/>
-  	<EditText
-    android:id="@+id/customDlg_title"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:inputType="text"
-  	/>
+        android:id="@+id/customDlg_titleTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="かみしばいのなまえ" />
 
+  	<EditText
+  	    android:id="@+id/customDlg_titleED"
+  	    android:layout_width="match_parent"
+  	    android:layout_height="wrap_content"
+  	    android:inputType="text" />
 
 </LinearLayout>

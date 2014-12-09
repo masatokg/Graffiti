@@ -6,6 +6,7 @@ package pokazon.jp;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -64,10 +65,14 @@ public class CustomListAdapter extends SimpleCursorAdapter {
         String filepath = cursor.getString(cursor.getColumnIndex("pass"));
 	   	 Bitmap bmp = null;
 	   	 if(filepath != null){
-	   		 bmp = BitmapFactory.decodeFile(filepath);
-	   		 bmp = this.changeImageSize(bmp, (float)0.2, (float)0.2);
-	         holder.imageView.setImageBitmap(bmp);
-	         Log.d("filepath = ", filepath);
+	 		BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inPreferredConfig = Config.ARGB_4444;
+			options.inPurgeable = true;
+			options.inSampleSize = 2;
+			bmp = BitmapFactory.decodeFile(filepath, options);
+	   		bmp = this.changeImageSize(bmp, (float)0.2, (float)0.2);
+	        holder.imageView.setImageBitmap(bmp);
+	        Log.d("filepath = ", filepath);
 	   	 }
 	   	 else{
 	         Log.e("filepath no file is null ", "");
@@ -94,4 +99,5 @@ public class CustomListAdapter extends SimpleCursorAdapter {
     	bmpRsz = Bitmap.createBitmap(bmpSrc, 0, 0, bmpSrc.getWidth(),bmpSrc.getHeight(), matrix,true);
     	return bmpRsz;
     }
+
 }

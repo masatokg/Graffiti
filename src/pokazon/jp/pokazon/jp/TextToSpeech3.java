@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ public class TextToSpeech3  extends Activity implements View.OnClickListener,
     // 選択中の紙芝居番号、ページ番号
     private int _kamiID = -1;
     private int _page = -1;
+    private String _imagefilePath = null;
 
 	private TextToSpeech mTextToSpeech;
 	private EditText mEditText;
@@ -46,13 +48,16 @@ public class TextToSpeech3  extends Activity implements View.OnClickListener,
 		 setContentView(R.layout.texttospeech3);
 
 	    Intent intent = getIntent();
-		this._page = intent.getIntExtra("page", -1);
-		this._kamiID = intent.getIntExtra("kamiID", -1);
+//		this._page = intent.getIntExtra("page", -1);
+//		this._kamiID = intent.getIntExtra("kamiID", -1);
 
 		Bundle bundle = intent.getExtras();
-		// 紙芝居番号、ページ番号を取得
-		_kamiID = bundle.getInt("kamiID");
-	   	_page = bundle.getInt("page");
+
+		// 紙芝居番号、ページ番号、画像パスを取得
+		this._kamiID = bundle.getInt("kamiID", -1);
+		this._page = bundle.getInt("page", -1);
+		this._imagefilePath = bundle.getString("imagefilePath");
+
 		TextView kamishibai = (TextView) findViewById(R.id.tvSpeachKamishibaiName);
 		TextView kamishibaiPage = (TextView) findViewById(R.id.tvSpeachKamishibaiPage);
 
@@ -71,21 +76,38 @@ public class TextToSpeech3  extends Activity implements View.OnClickListener,
 		 btnSpeachSave.setOnClickListener(this);
 
 		 // 該当するページの画像を表示する
-		 ImageView pageView = (ImageView)findViewById(R.id.pageView);
+		 ImageView pageView = (ImageView)findViewById(R.id.pageViewTextSpeach);
 
 		if(sdb == null){
 			helper = new MySQLiteOpenHelper(getApplicationContext());
+			sdb = helper.getWritableDatabase();
 		}
 		try{
-			sdb = helper.getWritableDatabase();
-			String imagefilePath = helper.getFilePath(sdb, _kamiID, _page);
-			if(imagefilePath!=null){
-		   		 Bitmap bmp = BitmapFactory.decodeFile(imagefilePath);
-		   		 bmp = this.changeImageSize(bmp, (float)1.2, (float)1.2);
+			if(this._imagefilePath!=null){
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				options.inPreferredConfig = Config.ARGB_4444;
+				options.inPurgeable = true;
+				options.inSampleSize = 3;
+				Bitmap dispImage = BitmapFactory.decodeFile(_imagefilePath, options);
+				pageView.setImageBitmap(dispImage);
+
+			}
+			else{
+				this._imagefilePath = helper.getFilePath(sdb, _kamiID, _page);
+				String kaminame = helper.selectKamishibaiNmae(sdb, _kamiID);
+				kamishibai.setText("かみしばい： " + kaminame);
+			}
+
+			if(this._imagefilePath!=null){
+
+		 		BitmapFactory.Options options = new BitmapFactory.Options();
+				options.inPreferredConfig = Config.ARGB_4444;
+				options.inPurgeable = true;
+				options.inSampleSize = 2;
+		   		Bitmap bmp = BitmapFactory.decodeFile(this._imagefilePath, options);
+		   		bmp = this.changeImageSize(bmp, (float)1.2, (float)1.2);
 		   		pageView.setImageBitmap(bmp);
 			}
-			String kaminame = helper.selectKamishibaiNmae(sdb, _kamiID);
-			kamishibai.setText("かみしばい： " + kaminame);
 			kamishibaiPage.setText(_page + " まいめ");
 		}catch(SQLiteException e){
 

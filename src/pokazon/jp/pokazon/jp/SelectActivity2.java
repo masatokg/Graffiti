@@ -1,6 +1,8 @@
 package pokazon.jp;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -12,6 +14,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
@@ -51,7 +54,7 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 	private Bitmap dispImage;
 	// カメラ画像またはギャラリー選択画像のファイルパスを保持するインスタンス変数
 	Uri _imageUri;
-	String _imagefilePath = "_imagefilePath初期値";
+	String _imagefilePath = null;
 
 	//SQLiteデータベース空間を操作するインスタンス変数を宣言
     SQLiteDatabase sdb = null;
@@ -63,19 +66,9 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 		// TODO 自動生成されたメソッド・スタブ
 		super.onCreate(savedInstanceState);
 		Log.d("SelectAct2","onCreate");
+
+/*
 		setContentView(R.layout.gazou_select);
-
-
-
-	}
-
-	@Override
-	protected void onResume() {
-		// TODO 自動生成されたメソッド・スタブ
-		super.onResume();
-		Intent intent = getIntent();
-		this._page = intent.getIntExtra("page", -1);
-		this._kamiID = intent.getIntExtra("kamiID", -1);
 
 		// しゃしんをえらぶ
 		ImageButton photoSelect = (ImageButton)findViewById(R.id.imageButton1);
@@ -96,6 +89,44 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 		_imageView = (ImageView)findViewById(R.id.pageView);
 
 		_text.setText(this._page + " まいめ");
+*/
+
+	}
+
+	@Override
+	protected void onResume() {
+		// TODO 自動生成されたメソッド・スタブ
+		super.onResume();
+		Intent intent = getIntent();
+		this._page = intent.getIntExtra("page", -1);
+		this._kamiID = intent.getIntExtra("kamiID", -1);
+
+		setContentView(R.layout.gazou_select);
+
+		// しゃしんをえらぶ
+		ImageButton photoSelect = (ImageButton)findViewById(R.id.imageButton1);
+		photoSelect.setOnClickListener(this);
+
+		// かめら
+		ImageButton camera = (ImageButton)findViewById(R.id.imageButton4);
+		camera.setOnClickListener(this);
+
+		// おわり
+		ImageButton owari = (ImageButton)findViewById(R.id.imageButtonOwari);
+		owari.setOnClickListener(this);
+
+		// ものがたりをつくる
+		ImageButton imageButton3 = (ImageButton)findViewById(R.id.imageButton3);
+		imageButton3.setOnClickListener(this);
+
+		// けってい
+		ImageButton kettei = (ImageButton)findViewById(R.id.imageButtonKettei);
+		kettei.setOnClickListener(this);
+
+		_text = (TextView)findViewById(R.id.pageIdx);
+		_imageView = (ImageView)findViewById(R.id.pageViewSelect);
+
+		_text.setText(this._page + " まいめ");
 
 		// クラスのフィールド変数がNULLなら、データベース空間をオープンン
 		if(sdb == null) {
@@ -110,14 +141,32 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 		// MySQLiteOpenHelperにSELECT文を実行させて結果のカーソルを受け取る
 		String filepath  = this.helper.getFilePath(sdb,_kamiID,_page);
 
-		// uri文字列 から画像を取得するメソッド
-		dispImage = BitmapFactory.decodeFile(_imagefilePath);
-		_imageView.setImageBitmap(dispImage);
+		// 画像パスが取れてないとき、uri文字列 から画像を取得するメソッド
+		if(_imagefilePath ==null || _imagefilePath.equals("")){
+			// _imagefilePathが、まえのがめんからわたってきてないとき
+			// DBからがぞうをよみこむ
+			_imagefilePath = helper.getFilePath(sdb, _kamiID, _page);
+		}
+		// もし画像パスが取れたら、画像をセット
+		if(_imagefilePath != null && !_imagefilePath.equals("") ){
+
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			options.inPreferredConfig = Config.ARGB_4444;
+			options.inPurgeable = true;
+			options.inSampleSize = 3;
+			dispImage = BitmapFactory.decodeFile(_imagefilePath, options);
+
+			_imageView = (ImageView)findViewById(R.id.pageViewSelect);
+			_imageView.setImageBitmap(dispImage);
+		}
 	}
 
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+		// 念のためOnResumeを呼ぶ
+		onResume();
 
 		// パスを取るためだけのコード
 		if(requestCode == REQUEST_GALLERY && resultCode == Activity.RESULT_OK) {
@@ -130,29 +179,23 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 			Log.v("C#", "path=" + _imagefilePath);
 
 			// uri文字列 から画像を取得するメソッド
-			dispImage = BitmapFactory.decodeFile(_imagefilePath);
+//			dispImage = BitmapFactory.decodeFile(_imagefilePath);
+			dispImage = this.loadMiniBitmap(_imageUri);
 			_imageView.setImageBitmap(dispImage);
 
             Log.d("-SelectActivity2:ギャラリー- _imagefilePath = ", _imagefilePath);
 			}
 		// カメラ撮影からの戻り時
 		else if(REQUEST_CAPTURE_IMAGE == requestCode && resultCode == Activity.RESULT_OK) {
-//			Bitmap capturedImage = (Bitmap) data.getExtras().get("data");
-//			dispImage = Bitmap.createScaledBitmap(capturedImage, 670, 480, false);
-//			_imageView.setImageBitmap(dispImage);
 
 			// uri文字列 から画像を取得するメソッド
-//			_imageView.setImageURI(_imageUri);
-//			_imagefilePath = GetPathToImage(_imageUri);
 			_imagefilePath = _imageUri.getPath();
             Log.d("-SelectActivity2:Camera- _imagefilePath = ", _imagefilePath);
-			dispImage = BitmapFactory.decodeFile(_imagefilePath);
+			dispImage = this.loadMiniBitmap(_imageUri);
 
 			// 画像の大きさ変更
 			dispImage = this.changeImageSize(dispImage);
 			_imageView.setImageBitmap(dispImage);
-			// カメラ画像のファイルパスを取得（_imageUriを保持しているので使わないかも）
-			_imagefilePath = _imageUri.getPath();
 		}
 	}
 
@@ -163,6 +206,7 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 
 		Intent intent = new Intent();
 		switch(v.getId()) {
+
 		case R.id.imageButton1: // しゃしんをえらぶ
 			intent.setType("image/*");
 			intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -170,7 +214,11 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
 			break;
 
 		case R.id.imageButton2: // おわり
+			// トップ画面に戻る
+			Intent intent2 = new Intent(SelectActivity2.this,Home.class);
+			startActivity(intent2);
 			break;
+
 		case R.id.imageButtonKettei: // 決定ボタン
 
 			// 返すデータ(Intent&Bundle)の作成
@@ -297,6 +345,39 @@ public class SelectActivity2 extends Activity implements View.OnClickListener{
     	// リサイズ画像
     	bmpRsz = Bitmap.createBitmap(bmpSrc, 0, 0, bmpSrc.getWidth(),bmpSrc.getHeight(), matrix,true);
     	return bmpRsz;
+    }
+
+
+    /**
+     * がぞうをちいさくよみこむ
+     * @param uri
+     * @return
+     */
+    private Bitmap loadMiniBitmap(Uri uri) {
+
+    	Bitmap miniBmp = null;
+
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inPreferredConfig = Config.ARGB_4444;
+		options.inPurgeable = true;
+		options.inSampleSize = 3;
+
+		InputStream inputStream = null;
+		try {
+			inputStream = getContentResolver().openInputStream(uri);
+		} catch (FileNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			Log.e(this.toString()+": loadMiniBitmap ", e.getMessage());
+			e.printStackTrace();
+		}
+		Bitmap bitmapOriginal = BitmapFactory.decodeStream(inputStream, null, options);
+//		BitmapFactory.decodeStream(inputStream, null, imageOptions);
+
+		miniBmp = bitmapOriginal.copy(Bitmap.Config.ARGB_4444,true);
+		bitmapOriginal.recycle();
+		bitmapOriginal = null;
+		return miniBmp;
+
     }
 
 }

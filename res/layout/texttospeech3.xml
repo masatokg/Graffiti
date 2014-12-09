@@ -55,7 +55,7 @@
                 android:text="かきかえ" />
 
             <ImageView
-                android:id="@+id/pageView"
+                android:id="@+id/pageViewTextSpeach"
                 android:layout_width="230dp"
                 android:layout_height="120dp"
                 android:layout_alignParentBottom="true"
